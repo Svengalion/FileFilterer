@@ -19,6 +19,9 @@ java -jar build/libs/FileFilterer-1.0-SNAPSHOT-all.jar [флаги] [файлы]
 
 #### 4. Тесты (опционально)
 Из Корня проекта
+
 gradle test
+
 Результаты можно посмотреть, открыв в браузере /build/reports/tests/test/index.html
+
 Покрытие можно посмотреть, открыв в браузере /build/reports/jacoco/test/html/index.html
