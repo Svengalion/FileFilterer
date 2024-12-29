@@ -97,7 +97,7 @@ public class Statistics {
     static class FloatStats {
         private long count = 0;
         private double min = Double.MAX_VALUE;
-        private double max = Double.MIN_VALUE;
+        private double max = Double.NEGATIVE_INFINITY;
         private double sum = 0.0;
         private double avg = 0.0;
 
