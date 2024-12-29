@@ -1,2 +1,8 @@
-rootProject.name = "FileFilterer"
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
 
+rootProject.name = "FileFilterer"
