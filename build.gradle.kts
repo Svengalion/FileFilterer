@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("application")
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("jacoco")
 }
 
 group = "org.example"
@@ -15,6 +16,7 @@ dependencies {
     implementation("commons-cli:commons-cli:1.5.0")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.mockito:mockito-core:4.11.0")
 }
 
 java {
@@ -23,11 +25,12 @@ java {
 }
 
 application {
-    mainClass.set("filefilterer.FileFilterer") // Указание главного класса
+    mainClass.set("filefilterer.FileFilterer")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>().configureEach {
-    archiveFileName.set("FileFilterer.jar")
+    archiveBaseName.set("FileFilterer")
+
     mergeServiceFiles()
     manifest {
         attributes["Main-Class"] = "filefilterer.FileFilterer"
@@ -36,4 +39,14 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>().con
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
 }

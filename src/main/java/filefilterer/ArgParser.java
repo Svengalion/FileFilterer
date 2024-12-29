@@ -5,7 +5,6 @@ import org.apache.commons.cli.*;
 import java.util.List;
 
 public class ArgParser {
-
     private CommandLine cmd;
 
     public ArgParser(String[] args) throws ParseException {
