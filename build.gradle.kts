@@ -37,7 +37,7 @@ java {
 }
 
 application {
-    mainClass.set("filefilterer.FileFilterer")
+    mainClass.set("file_filterer.Application")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>().configureEach {
@@ -45,7 +45,7 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>().con
 
     mergeServiceFiles()
     manifest {
-        attributes["Main-Class"] = "filefilterer.FileFilterer"
+        attributes["Main-Class"] = "file_filterer.Application"
     }
 }
 

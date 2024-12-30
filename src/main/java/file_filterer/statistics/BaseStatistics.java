@@ -1,25 +1,27 @@
-package file_filterer.stats;
+package file_filterer.statistics;
 
 import lombok.Getter;
 
 @Getter
-public abstract class BaseStats <T> implements Stats <T> {
-    protected long count;
+public abstract class BaseStatistics<T> implements Statistics<T> {
+    protected long count = 0;
 
     @Override
-    public void printStats(boolean shortStats, boolean fullStats) {
+    public void printStatistics(boolean shortStats, boolean fullStats) {
         if (getCount() > 0) {
             System.out.println(getTypeName() + ":");
             if (shortStats) {
                 System.out.println("  Количество: " + getCount());
             }
             if (fullStats) {
-                printFullStats();
+                printFullStatistics();
             }
         }
     }
 
+    public abstract String getType();
+
     protected abstract String getTypeName();
 
-    protected abstract void printFullStats();
+    protected abstract void printFullStatistics();
 }

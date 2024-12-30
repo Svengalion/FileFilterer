@@ -1,20 +1,24 @@
 package file_filterer;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.cli.*;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
+@Service
 public class ArgParser {
-    private final String outputPath;
-    private final String prefix;
-    private final boolean append;
-    private final boolean full;
-    private final boolean shortStat;
-    private final List<String> files;
+    private String outputPath;
+    private String prefix;
+    private boolean append;
+    private boolean full;
+    private boolean shortStat;
+    private List<String> files;
 
-    public ArgParser(String[] args) throws ParseException {
+    public void setFlags(String[] args) throws ParseException {
         Options options = new Options();
 
         options.addOption("o", "output", true, "Изменение пути для результатов");

@@ -1,12 +1,12 @@
-package file_filterer.stats;
+package file_filterer.statistics;
 
 import lombok.Getter;
 
 @Getter
-public abstract class NumericStats<T extends Number> extends BaseStats<T> {
+public abstract class NumericStatistics<T extends Number> extends BaseStatistics<T> {
     protected long count = 0;
     protected double min = Double.MAX_VALUE;
-    protected double max = Double.MIN_VALUE;
+    protected double max = Double.NEGATIVE_INFINITY;
     protected double sum = 0.0;
 
     public double getAvg() {
@@ -14,20 +14,7 @@ public abstract class NumericStats<T extends Number> extends BaseStats<T> {
     }
 
     @Override
-    public void update(T value) {
-        count++;
-        double val = value.doubleValue();
-        if (val < min) {
-            min = val;
-        }
-        if (val > max) {
-            max = val;
-        }
-        sum += val;
-    }
-
-    @Override
-    protected void printFullStats() {
+    protected void printFullStatistics() {
         System.out.println("  Минимум: " + min);
         System.out.println("  Максимум: " + max);
         System.out.println("  Сумма: " + sum);

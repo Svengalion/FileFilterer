@@ -1,6 +1,7 @@
 package file_filterer;
 
-import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,13 +10,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-@AllArgsConstructor
+@Service
+@NoArgsConstructor
 public class OutputManager {
-    private String outputPath;
-    private String prefix;
-    private boolean append;
 
-    private String getFileName(String type) {
+    private String getFileName(String type, String prefix) {
         String filename = prefix;
         switch (type) {
             case "int":
@@ -33,8 +32,8 @@ public class OutputManager {
         return filename;
     }
 
-    public void writeInFile(String data, String type) {
-        String filename = getFileName(type);
+    public void writeInFile(String data, String type, String outputPath, boolean append, String prefix) {
+        String filename = getFileName(type, prefix);
 
         try {
             Path path = Paths.get(outputPath, filename);

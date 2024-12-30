@@ -1,8 +1,10 @@
 package file_filterer;
 
-import file_filterer.statistics.Statistics;
+import file_filterer.processor.LineProcessor;
 import lombok.AllArgsConstructor;
 import org.apache.commons.cli.ParseException;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,27 +13,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class FileFilterer {
-    public static void main(String[] args) {
+@Component
+@AllArgsConstructor
+public class FileFilterer implements CommandLineRunner {
+    private final ArgParser argParser;
+    private final List<LineProcessor> processors;
+    private final FileStatisticsProcessor fileStatisticsProcessor;
+
+    private List<String> getArgsAndFiles(String[] args) {
+        List<String> input = null;
         try {
-            ArgParser argumentParser = new ArgParser(args);
-            List<String> input = argumentParser.getFiles();
+            argParser.setFlags(args);
+            input = argParser.getFiles();
             if (input.isEmpty()) {
                 System.out.println("Добавьте файлы для изменения");
                 System.exit(0);
             }
-
-            var outputManager = new OutputManager(
-                    argumentParser.getOutputPath(), argumentParser.getPrefix(), argumentParser.isAppend());
-
-            processFiles(input, outputManager);
         } catch (ParseException e) {
             System.err.println("Ошибка парсинга аргументов " + e.getMessage());
         }
+        return input;
     }
 
-    public static void processFiles(List<String> inputFiles, OutputManager outputManager) {
-        for (String file : inputFiles) {
+    public void processFiles(String[] args) {
+        var files = getArgsAndFiles(args);
+
+        for (String file : files) {
             Path path = Paths.get(file);
             if (!Files.exists(path)) {
                 System.err.println("Файл " + file + " не существует");
@@ -41,48 +48,33 @@ public class FileFilterer {
             try (BufferedReader reader = Files.newBufferedReader(path)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    processLine(line, outputManager);
+                    processLine(line);
                 }
             } catch (IOException e) {
                 System.err.println("Ошибка при чтении файла " + file + ": " + e.getMessage());
             }
         }
+        fileStatisticsProcessor.writeStatisticsToFile();
     }
 
-    private static void processLine(String line, OutputManager outputManager, Statistics statistics) {
-        var argParser = new ArgParser();
-
+    private void processLine(String line) {
         line = line.trim();
         if (line.isEmpty()) {
             return;
         }
 
-        if (isInt(line)) {
-            statistics.printStatistics(argParser.isShortStat(), argParser.isFull());
-        } else if (isFloat(line)) {
-            outputManager.writeFloat(line);
-            statistics.updateFloatStats(Double.parseDouble(line));
-        } else {
-            outputManager.writeString(line);
-            statistics.updateStringStats(line);
+        for (LineProcessor processor : processors) {
+            if (processor.canProcess(line)) {
+                processor.process(line);
+                return;
+            }
         }
+
+        System.err.println("Не удалось обработать строку: " + line);
     }
 
-    private static boolean isInt(String value) {
-        try {
-            Long.parseLong(value);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private static boolean isFloat(String value) {
-        try {
-            Double.parseDouble(value);
-            return !isInt(value);
-        } catch (NumberFormatException e) {
-            return false;
-        }
+    @Override
+    public void run(String... args) {
+        processFiles(args);
     }
 }

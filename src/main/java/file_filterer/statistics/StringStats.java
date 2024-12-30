@@ -1,9 +1,11 @@
-package file_filterer.stats;
+package file_filterer.statistics;
 
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 
 @Getter
-public class StringStats extends BaseStats<String> {
+@Component
+public class StringStats extends BaseStatistics<String> {
     private long count;
     private int minLength = Integer.MAX_VALUE;
     private int maxLength = Integer.MIN_VALUE;
@@ -21,12 +23,17 @@ public class StringStats extends BaseStats<String> {
     }
 
     @Override
+    public String getType() {
+        return "string";
+    }
+
+    @Override
     protected String getTypeName() {
         return "Строки";
     }
 
     @Override
-    protected void printFullStats() {
+    protected void printFullStatistics() {
         System.out.println("  Самая короткая строка: " + minLength);
         System.out.println("  Самая длинная строка: " + maxLength);
     }
