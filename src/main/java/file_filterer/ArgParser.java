@@ -1,16 +1,21 @@
-package filefilterer;
+package file_filterer;
 
+import lombok.Getter;
 import org.apache.commons.cli.*;
 
 import java.util.List;
 
+@Getter
 public class ArgParser {
-    private CommandLine cmd;
+    private final String outputPath;
+    private final String prefix;
+    private final boolean append;
+    private final boolean full;
+    private final boolean shortStat;
+    private final List<String> files;
 
     public ArgParser(String[] args) throws ParseException {
-        Options options;
-
-        options = new Options();
+        Options options = new Options();
 
         options.addOption("o", "output", true, "Изменение пути для результатов");
         options.addOption("p", "prefix", true, "Изменение префикса имен выходных файлов");
@@ -19,30 +24,13 @@ public class ArgParser {
         options.addOption("f", "full", false, "Полная статистика");
 
         CommandLineParser parser = new DefaultParser();
-        cmd = parser.parse(options, args);
-    }
+        CommandLine cmd = parser.parse(options, args);
 
-    public String getOutputPath() {
-        return cmd.getOptionValue("o", ".");
-    }
-
-    public String getPrefix() {
-        return cmd.getOptionValue("p", "");
-    }
-
-    public boolean isAppend() {
-        return cmd.hasOption("a");
-    }
-
-    public boolean isFull() {
-        return cmd.hasOption("f");
-    }
-
-    public boolean isShort() {
-        return cmd.hasOption("s");
-    }
-
-    public List<String> getFiles() {
-        return cmd.getArgList();
+        this.outputPath = cmd.getOptionValue("o", ".");
+        this.prefix = cmd.getOptionValue("p", "");
+        this.append = cmd.hasOption("a");
+        this.full = cmd.hasOption("f");
+        this.shortStat = cmd.hasOption("s");
+        this.files = cmd.getArgList();
     }
 }

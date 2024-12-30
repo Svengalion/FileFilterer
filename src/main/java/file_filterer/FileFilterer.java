@@ -1,8 +1,15 @@
-package filefilterer;
+package file_filterer;
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
+import file_filterer.statistics.Statistics;
+import lombok.AllArgsConstructor;
+import org.apache.commons.cli.ParseException;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 public class FileFilterer {
     public static void main(String[] args) {
@@ -14,26 +21,16 @@ public class FileFilterer {
                 System.exit(0);
             }
 
-            String outputPath = argumentParser.getOutputPath();
-            String prefix = argumentParser.getPrefix();
-            boolean append = argumentParser.isAppend();
-            boolean shortStat = argumentParser.isShort();
-            boolean fullStat = argumentParser.isFull();
+            var outputManager = new OutputManager(
+                    argumentParser.getOutputPath(), argumentParser.getPrefix(), argumentParser.isAppend());
 
-            OutputManager outputManager = new OutputManager(outputPath, prefix, append);
-            Statistics statistics = new Statistics();
-
-            processFiles(input, outputManager, statistics);
-
-            outputManager.closeAll();
-            statistics.printStats(shortStat, fullStat);
-
-        } catch (org.apache.commons.cli.ParseException e) {
+            processFiles(input, outputManager);
+        } catch (ParseException e) {
             System.err.println("Ошибка парсинга аргументов " + e.getMessage());
         }
     }
 
-    public static void processFiles(List<String> inputFiles, OutputManager outputManager, Statistics statistics) {
+    public static void processFiles(List<String> inputFiles, OutputManager outputManager) {
         for (String file : inputFiles) {
             Path path = Paths.get(file);
             if (!Files.exists(path)) {
@@ -44,7 +41,7 @@ public class FileFilterer {
             try (BufferedReader reader = Files.newBufferedReader(path)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    processLine(line, outputManager, statistics);
+                    processLine(line, outputManager);
                 }
             } catch (IOException e) {
                 System.err.println("Ошибка при чтении файла " + file + ": " + e.getMessage());
@@ -53,14 +50,15 @@ public class FileFilterer {
     }
 
     private static void processLine(String line, OutputManager outputManager, Statistics statistics) {
+        var argParser = new ArgParser();
+
         line = line.trim();
         if (line.isEmpty()) {
             return;
         }
 
         if (isInt(line)) {
-            outputManager.writeInteger(line);
-            statistics.updateIntStats(Long.parseLong(line));
+            statistics.printStatistics(argParser.isShortStat(), argParser.isFull());
         } else if (isFloat(line)) {
             outputManager.writeFloat(line);
             statistics.updateFloatStats(Double.parseDouble(line));
