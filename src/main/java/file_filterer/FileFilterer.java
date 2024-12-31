@@ -57,7 +57,7 @@ public class FileFilterer implements CommandLineRunner {
         fileStatisticsProcessor.writeStatisticsToFile();
     }
 
-    private void processLine(String line) {
+    void processLine(String line) {
         line = line.trim();
         if (line.isEmpty()) {
             return;
