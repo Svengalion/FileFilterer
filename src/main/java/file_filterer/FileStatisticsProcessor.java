@@ -5,7 +5,7 @@ import file_filterer.processor.IntegerProcessor;
 import file_filterer.processor.StringProcessor;
 import file_filterer.statistics.FloatStatistics;
 import file_filterer.statistics.IntegerStatistics;
-import file_filterer.statistics.StringStats;
+import file_filterer.statistics.StringStatistics;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ public class FileStatisticsProcessor {
     private final StringProcessor stringProcessor;
     private final IntegerStatistics integerStatistics;
     private final FloatStatistics floatStatistics;
-    private final StringStats stringStatistics;
+    private final StringStatistics stringStatistics;
 
     void writeStatisticsToFile() {
         String integerResult = String.join("\n", integerProcessor.getListOfIntegers());

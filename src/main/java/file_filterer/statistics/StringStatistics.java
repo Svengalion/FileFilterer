@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Getter
 @Component
-public class StringStats extends BaseStatistics<String> {
+public class StringStatistics extends BaseStatistics<String> {
     private long count;
     private int minLength = Integer.MAX_VALUE;
     private int maxLength = Integer.MIN_VALUE;

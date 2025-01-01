@@ -1,100 +1,106 @@
 package file_filterer;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class OutputManagerTest {
-
-    @Mock
-    private ArgParser argParser;
-
-    @Mock
-    private FileStatisticsProcessor fileStatisticsProcessor;
+class OutputManagerTest {
 
     private OutputManager outputManager;
+    private static final String TEST_OUTPUT_PATH = "test_output";
+    private static final String PREFIX = "test_";
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         outputManager = new OutputManager();
     }
 
-    @Test
-    void testWriteInFile() throws IOException {
-        String data = "test data";
-        String type = "int";
-        String outputPath = ".";
-        String prefix = "test_";
-        boolean append = false;
-
-        Path outputPathDir = Paths.get(outputPath, "test_integers.txt");
-        Files.createDirectories(outputPathDir.getParent());
-
-        outputManager.writeInFile(data, type, outputPath, append, prefix);
-
-        assertTrue(Files.exists(outputPathDir));
-        String fileContent = Files.readString(outputPathDir);
-        assertEquals("test data\n", fileContent);
-
-        Files.deleteIfExists(outputPathDir);
+    @AfterEach
+    void tearDown() throws IOException {
+        Path path = Paths.get(TEST_OUTPUT_PATH);
+        if (Files.exists(path)) {
+            Files.walk(path)
+                    .sorted((a, b) -> b.compareTo(a))
+                    .forEach(p -> {
+                        try {
+                            Files.delete(p);
+                        } catch (IOException e) {
+                            System.err.println("Ошибка удаления файла: " + p);
+                        }
+                    });
+        }
     }
 
     @Test
-    void testWriteInFile_Append() throws IOException {
-        String data = "test data";
+    void testWriteInFile_createsFileAndWritesData() throws IOException {
+        String data = "Test data";
+        String type = "string";
+        boolean append = false;
+
+        outputManager.writeInFile(data, type, TEST_OUTPUT_PATH, append, PREFIX);
+
+        Path filePath = Paths.get(TEST_OUTPUT_PATH, PREFIX + "strings.txt");
+        assertThat(Files.exists(filePath)).isTrue();
+
+        String content = Files.readString(filePath);
+        assertThat(content.trim()).isEqualTo(data);
+    }
+
+    @Test
+    void testWriteInFile_appendsDataToFile() throws IOException {
+        String data1 = "First line";
+        String data2 = "Second line";
         String type = "int";
-        String outputPath = ".";
-        String prefix = "test_";
         boolean append = true;
 
-        Path outputPathDir = Paths.get(outputPath, "test_integers.txt");
-        Files.createDirectories(outputPathDir.getParent());
-        Files.writeString(outputPathDir, "existing content\n");
+        outputManager.writeInFile(data1, type, TEST_OUTPUT_PATH, false, PREFIX);
+        outputManager.writeInFile(data2, type, TEST_OUTPUT_PATH, append, PREFIX);
 
-        outputManager.writeInFile(data, type, outputPath, append, prefix);
+        Path filePath = Paths.get(TEST_OUTPUT_PATH, PREFIX + "integers.txt");
+        assertThat(Files.exists(filePath)).isTrue();
 
-        String fileContent = Files.readString(outputPathDir);
-        assertEquals("existing content\ntest data\n", fileContent);
-
-        Files.deleteIfExists(outputPathDir);
+        String content = Files.readString(filePath);
+        assertThat(content).isEqualTo(String.join(System.lineSeparator(), data1, data2) + System.lineSeparator());
     }
 
     @Test
-    void testWriteInFile_InvalidType() throws IOException {
-        String data = "test data";
-        String type = "invalid";
-        String outputPath = ".";
-        String prefix = "test_";
-        boolean append = false;
+    void testWriteInFile_handlesInvalidType() {
+        String data = "Invalid type data";
+        String type = "unknown";
 
-        assertThrows(IllegalArgumentException.class, () -> outputManager.writeInFile(data, type, outputPath, append, prefix));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            outputManager.writeInFile(data, type, TEST_OUTPUT_PATH, false, PREFIX);
+        });
     }
 
     @Test
-    void testCreateDirectories() throws IOException {
-        String data = "test data";
-        String type = "int";
-        String outputPath = ".";
-        String prefix = "test_";
-        boolean append = false;
+    void testWriteInFile_createsParentDirectories() throws IOException {
+        String data = "Data with directories";
+        String type = "float";
 
-        Path outputPathDir = Paths.get(outputPath, "test_integers.txt");
-        Path parentDir = outputPathDir.getParent();
-        Files.createDirectories(parentDir);
+        outputManager.writeInFile(data, type, TEST_OUTPUT_PATH + "/nested/folder", false, PREFIX);
 
-        assertTrue(Files.exists(parentDir));
+        Path filePath = Paths.get(TEST_OUTPUT_PATH, "nested/folder", PREFIX + "floats.txt");
+        assertThat(Files.exists(filePath)).isTrue();
 
-        Files.deleteIfExists(outputPathDir);
+        String content = Files.readString(filePath);
+        assertThat(content.trim()).isEqualTo(data);
+    }
+
+    @Test
+    void testWriteInFile_handlesIOExceptionGracefully() {
+        String data = "Data";
+        String type = "string";
+        String invalidPath = "/invalid_path";
+
+        outputManager.writeInFile(data, type, invalidPath, false, PREFIX);
+
+        Path filePath = Paths.get(invalidPath, PREFIX + "strings.txt");
+        assertThat(Files.exists(filePath)).isFalse();
     }
 }

@@ -18,13 +18,17 @@ public class FloatProcessor implements LineProcessor {
     @Override
     public boolean canProcess(String line) {
         try {
+            if (integerProcessor.canProcess(line)) {
+                return false;
+            }
             Double.parseDouble(line);
             listOfFloats.add(line);
-            return !integerProcessor.canProcess(line);
+            return true;
         } catch (NumberFormatException e) {
             return false;
         }
     }
+
 
     @Override
     public void process(String line) {

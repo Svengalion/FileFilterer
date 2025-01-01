@@ -4,6 +4,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IntegerStatistics extends NumericStatistics<Long> {
+    public IntegerStatistics() {
+        this.min = Long.MAX_VALUE;
+        this.max = Long.MIN_VALUE;
+    }
+
     @Override
     public String getType() {
         return "int";
